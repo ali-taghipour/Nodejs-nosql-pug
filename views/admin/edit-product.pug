@@ -1,0 +1,21 @@
+extends ../layouts/main-layout.pug
+
+block styles 
+    link(rel="stylesheet", href="/css/product.css")
+    link(rel="stylesheet", href="/css/form.css")
+
+block content
+    main
+        form.product-form(action=`${editing ? "/admin/edit-product" : "/admin/add-product"}`, method="POST")
+            .form-control
+                label(for="title") Title
+                input(type="text", name="title" value=`${editing ? product.title : ""}`)#title
+                label(for="imageUrl") Image Url
+                input(type="text", name="imageUrl" value=`${editing ? product.imageUrl : ""}`)#imageUrl
+                label(for="price") Price
+                input(type="text", name="price" value=`${editing ? product.price : ""}`)#price
+                label(for="description") Description
+                textarea(type="text", name="description" rows="5" cols="35")#description #{editing ? product.description : ""}
+                if editing
+                    input(type="hidden" name="productId" value=`${product._id}`)
+            button.btn(type="submit") #{editing ? "Edit Product" : "Add Product"}
