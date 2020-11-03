@@ -9,7 +9,6 @@ class Product {
     this.imageUrl = imageUrl;
     this._id = _id ? new mongodb.ObjectID(_id) : null;
     this.userId = userId;
-    
   }
 
   save() {
