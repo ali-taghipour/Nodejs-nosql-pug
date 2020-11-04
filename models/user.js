@@ -4,7 +4,7 @@ const mongodb = require("mongodb");
 const ObjectID = mongodb.ObjectID;
 
 class User {
-  constructor(userName, email,cart, _id) {
+  constructor(userName, email, cart, _id) {
     this.userName = userName;
     this.email = email;
     this.cart = cart; // items:[]
@@ -20,39 +20,124 @@ class User {
       .catch((err) => console.log(err));
   }
 
-  addToCart(product){
+  addToCart(product) {
     const db = getDb();
-    let newQuantity = 1
+    let newQuantity = 1;
     const updatedCartItems = [...this.cart.items];
-    const cartProductIndex = updatedCartItems.findIndex(cp => cp.productId.toString() === product._id.toString());
-    if(cartProductIndex >= 0){
+    const cartProductIndex = updatedCartItems.findIndex(
+      (cp) => cp.productId.toString() === product._id.toString()
+    );
+    if (cartProductIndex >= 0) {
       newQuantity = updatedCartItems[cartProductIndex].quantity + 1;
       updatedCartItems[cartProductIndex].quantity = newQuantity;
-    }
-    else{
-      updatedCartItems.push({productId: new ObjectID(product._id),quantity: newQuantity})
-    }
-    
-    const updatedCart = {
-      items: updatedCartItems
+    } else {
+      updatedCartItems.push({
+        productId: new ObjectID(product._id),
+        quantity: newQuantity,
+      });
     }
 
-    return db.collection("users")
-      .updateOne({_id: new ObjectID(this._id)},
-      {$set:{cart: updatedCart}})
+    const updatedCart = {
+      items: updatedCartItems,
+    };
+
+    return db
+      .collection("users")
+      .updateOne(
+        { _id: new ObjectID(this._id) },
+        { $set: { cart: updatedCart } }
+      );
   }
 
-  static findById(userId){
+  getCart() {
+    const db = getDb();
+    const productIds = this.cart.items.map((item) => {
+      return item.productId;
+    });
+
+    let updatedCartItems = this.cart.items;
+
+    return db
+      .collection("products")
+      .find({ _id: { $in: productIds } })
+      .toArray()
+      .then((products) => {
+        productIds.forEach(id => {
+          const existIndex = products.findIndex(p => {
+            return p._id.toString() === id.toString();
+          })
+          if(existIndex < 0){
+            updatedCartItems = this.cart.items.filter(item => {
+              return item.productId.toString() !== id.toString();
+            })
+          }
+        })
+        return products;
+      }).then(products => {
+        db.collection("users").updateOne({_id: this._id},{$set:{cart:{items: updatedCartItems}}});
+        return products.map((product) => {
+          return {
+            ...product,
+            quantity: this.cart.items.find((item) => {
+              return item.productId.toString() === product._id.toString();
+            }).quantity,
+          };
+        });
+      })
+      .catch((err) => console.log(err));
+  }
+
+  deleteCartProduct(productId) {
+    const updatedCartItems = this.cart.items.filter((item) => {
+      return item.productId.toString() !== productId.toString();
+    });
+    const updatedCart = {
+      items: updatedCartItems,
+    };
     const db = getDb();
     return db
-    .collection("users")
-    .findOne({_id: new ObjectID(userId)})
-    .then(product => {
+      .collection("users")
+      .updateOne({ _id: this._id }, { $set: { cart: updatedCart } });
+  }
+
+  addOrder() {
+    const db = getDb();
+    return this.getCart()
+      .then((products) => {
+        const order = {
+          items: products,
+          user: {
+            _id: new ObjectID(this._id),
+            userName: this.userName,
+          },
+        };
+        return db.collection("orders").insertOne(order);
+      })
+      .then(() => {
+        return db
+          .collection("users")
+          .updateOne({ _id: this._id }, { $set: { cart: { items: [] } } });
+      });
+  }
+
+  getOrders() {
+    const db = getDb();
+    return db
+      .collection("orders")
+      .find({ "user._id": new ObjectID(this._id) })
+      .toArray();
+  }
+
+  static findById(userId) {
+    const db = getDb();
+    return db
+      .collection("users")
+      .findOne({ _id: new ObjectID(userId) })
+      .then((product) => {
         return product;
-    })
-    .catch(err => console.log(err));
+      })
+      .catch((err) => console.log(err));
   }
 }
-
 
 module.exports = User;
