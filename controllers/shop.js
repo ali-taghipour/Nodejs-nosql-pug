@@ -1,8 +1,8 @@
 const Product = require("../models/product");
-const User = require("../models/user");
+const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) =>
       res.render("shop/product-list", {
         prods: products,
@@ -17,7 +17,7 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) =>
       res.render("shop/index", {
         prods: products,
@@ -30,8 +30,12 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
   req.user
-    .getCart()
-    .then((products) => {
+  // populate spread other props of productId into cart items
+    .populate("cart.items.productId")
+  // it doesn't give back promise itself for that we use exec to create promise for that 
+    .execPopulate()
+    .then((user) => {
+      products = user.cart.items;
       res.render("shop/cart", {
         cartProducts: products,
         pageTitle: "cart",
@@ -46,7 +50,8 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  req.user.getOrders().then((orders) => {
+  Order.find({"user.userId": req.user._id})
+  .then((orders) => {
     res.render("shop/orders", {
       orders: orders,
       pageTitle: "Your Orders",
@@ -97,7 +102,25 @@ exports.postDeleteCartProduct = (req, res, next) => {
 
 exports.postOrder = (req, res, next) => {
   req.user
-    .addOrder()
+    .populate("cart.items.productId")
+    .execPopulate()
+    .then(user => {
+      const products = user.cart.items.map(i => {
+        /// _doc is a special mongoose thing that pull out whole of the producId object because we cant access it in simple way
+        return {quantity: i.quantity, product: {...i.productId._doc}}
+      })
+      const order = new Order({
+        user:{
+          userName: req.user.userName,
+          userId: req.user
+        },
+        products: products
+      });
+      return order.save();
+    })
+    .then(result => {
+      return req.user.clearCart();
+    })
     .then(() => {
       res.redirect("./orders");
     })

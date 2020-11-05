@@ -11,7 +11,7 @@ block content
                     li.orders__item
                         h1 # #{order._id}
                         ul.orders__products
-                            each product in order.items
-                                li.orders__products-item #{product.title} (#{product.quantity})
+                            each p in order.products
+                                li.orders__products-item #{p.product.title} (#{p.quantity})
         else
             h1 Nothing to share!!!

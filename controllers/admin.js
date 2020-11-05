@@ -1,3 +1,4 @@
+const product = require("../models/product");
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
@@ -13,7 +14,14 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
   
-  const product = new Product(title,price,description,imageUrl,null,req.user._id);
+  const product = new Product({
+    title: title,
+    price: price,
+    description: description,
+    imageUrl: imageUrl,
+    // i didn't add req.user._id because it gets it automatically
+    userId: req.user
+  });
   product.save().then(() => {
     console.log("Product Created!!!");
     res.redirect("/admin/products");
@@ -23,7 +31,12 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
+  // -_id in select means removing product id
+  // by select we just get some props
+  //.select("title price -_id")
+  // with populate in this case we get user complete info by userId field in product and we just can get special props by second arguments
+  //.populate("userId","userName")
     .then((products) => {
       res.render("admin/product-list", {
         prods: products,
@@ -59,8 +72,13 @@ exports.postEditProduct = (req, res, next) => {
   const productImageUrl = req.body.imageUrl;
   const productPrice = req.body.price;
   const productDescription = req.body.description;
-  const product = new Product(productTitle,productPrice,productDescription,productImageUrl, productId);
-  product.save()
+  Product.findById(productId).then(product => {
+    product.title = productTitle;
+    product.price = productPrice;
+    product.description = productDescription;
+    product.imageUrl = productImageUrl;
+    product.save();
+  })
     .then(() => {
       console.log("Product Updated!!!");
       res.redirect("/");
@@ -70,7 +88,7 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const productId = req.body.productId;
-  Product.deleteByID(productId)
+  Product.findByIdAndRemove(productId)
     .then(() => {
       console.log("Destroied Product!");
       res.redirect("/admin/products");
