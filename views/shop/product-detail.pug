@@ -6,10 +6,11 @@ block content
     main(style="text-align:center")
         h1 #{product.title}
         hr
-        div
+        div.imageContainer
             img(src=`${product.imageUrl}` alt=`${product.title}`)
         h2 #{product.price}
         p #{product.description}
-        form(action="/cart" method="post")
-            input(type="hidden" name="productId" value=`${product._id}`)
-            button.btn(type="submit") Add to Cart
+        if isAuthenticated
+            form(action="/cart" method="post")
+                input(type="hidden" name="productId" value=`${product._id}`)
+                button.btn(type="submit") Add to Cart

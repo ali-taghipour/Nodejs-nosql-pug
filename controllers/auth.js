@@ -1,11 +1,24 @@
+const User = require("../models/user");
+
 exports.getLogin = (req,res,next) => {
-    const isLoggedin = req.get("Cookie").split("=")[1] === "true";
+    const isLoggedin = req.session.isLoggedin;
     res.render("auth/login",{ pageTitle: "Login",path:"/login",isAuthenticated: isLoggedin});
 };
 
 exports.postLogin = (req,res,next) => {
-   // expires format res.setHeader("set-Cookie","isLoggedin=true; Expires=Sat, 07 Nov 2020 00:24:09 GMT or Max-Age=10// it alternative way for expiration in 10 seconds"); 
-   // we use Secure and it is for Https to encrypt data in request
-   res.setHeader("set-Cookie","isLoggedin=true; HttpOnly")
-   res.redirect("/");
+    User.findById("5fa3143fa1fa6c1d1dca6f24").then(user => {
+        req.session.user = user;
+        req.session.isLoggedin = true;
+        // .save method guarantee that session saved in database before redirecting
+        req.session.save(err => {
+            res.redirect("/");
+        })
+    }).catch(err => console.log(err));
 };
+
+exports.postLogout = (req,res,next) => {
+    req.session.destroy((err) => {
+        res.redirect("/");
+    });
+ };
+ 

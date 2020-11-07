@@ -18,9 +18,10 @@ block content
                             p.product__description #{product.description}
                         .card__actions
                             a.btn(href=`/products/${product._id}`) Details
-                            form(action="/cart" method="POST")
-                                input(type="hidden" name="productId" value=`${product._id}`)
-                                button.btn(type="submit") Add to Cart
+                            if isAuthenticated
+                                form(action="/cart" method="POST")
+                                    input(type="hidden" name="productId" value=`${product._id}`)
+                                    button.btn(type="submit") Add to Cart
         else
             h1 No Products
 

@@ -2,7 +2,7 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
-  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
+  const isLoggedin = req.session.isLoggedin;
   Product.find()
     .then((products) =>
       res.render("shop/product-list", {
@@ -19,7 +19,7 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
+  const isLoggedin = req.session.isLoggedin;
   Product.find()
     .then((products) =>
       res.render("shop/index", {
@@ -33,7 +33,7 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
+  const isLoggedin = req.session.isLoggedin;
   req.user
   // populate spread other props of productId into cart items
     .populate("cart.items.productId")
@@ -52,12 +52,12 @@ exports.getCart = (req, res, next) => {
 };
 
 exports.getCheckout = (req, res, next) => {
-  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
+  const isLoggedin = req.session.isLoggedin;
   res.render("shop/checkout", { pageTitle: "Checkout", path: "/checkout",isAuthenticated: isLoggedin });
 };
 
 exports.getOrders = (req, res, next) => {
-  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
+  const isLoggedin = req.session.isLoggedin;
   Order.find({"user.userId": req.user._id})
   .then((orders) => {
     res.render("shop/orders", {
@@ -70,7 +70,7 @@ exports.getOrders = (req, res, next) => {
 };
 
 exports.getProduct = (req, res, next) => {
-  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
+  const isLoggedin = req.session.isLoggedin;
   const proId = req.params.productId;
   //   Product.findAll({where: {id: proId}})
   //   .then(product =>

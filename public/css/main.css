@@ -204,6 +204,16 @@ form {
   color: white;
 }
 
+.imageContainer{
+  margin: 0 auto;
+  width: 30em;
+}
+
+.imageContainer > img{
+  width: 100%;
+  height: 100%;
+} 
+
 @media (min-width: 768px) {
   .main-header__nav {
     display: flex;
