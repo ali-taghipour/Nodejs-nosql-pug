@@ -1,7 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const session = require("express-session");
+
 const adminRoutes = require("./routes/admin");
 const shopRouter = require("./routes/shop");
+const authRouter = require("./routes/auth");
 const dirPath = require("./util/path");
 const path = require("path");
 const errorController = require("./controllers/error");
@@ -17,6 +20,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(dirPath, "public")));
 
+// we can use any name for secret and it use for hashing data
+// we use resave to not save per session per request expect on it did change
+// we use saveUnitialized for not saving unitialized value
+app.use(session({secret: "my secret", resave: false, saveUninitialized: false}))
+
 app.use((req, res, next) => {
     User.findById("5fa3143fa1fa6c1d1dca6f24").then(user => {
         req.user = user;
@@ -26,6 +34,7 @@ app.use((req, res, next) => {
 
 app.use("/admin", adminRoutes);
 app.use(shopRouter);
+app.use(authRouter);
 
 app.use(errorController.get404);
 

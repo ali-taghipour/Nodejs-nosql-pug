@@ -2,12 +2,14 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
+  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
   Product.find()
     .then((products) =>
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
+        isAuthenticated: isLoggedin
       })
     )
     .catch((err) => console.log(err));
@@ -17,18 +19,21 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
+  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
   Product.find()
     .then((products) =>
       res.render("shop/index", {
         prods: products,
         pageTitle: "My Shop",
         path: "/",
+        isAuthenticated: isLoggedin
       })
     )
     .catch((err) => console.log(err));
 };
 
 exports.getCart = (req, res, next) => {
+  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
   req.user
   // populate spread other props of productId into cart items
     .populate("cart.items.productId")
@@ -40,27 +45,32 @@ exports.getCart = (req, res, next) => {
         cartProducts: products,
         pageTitle: "cart",
         path: "/cart",
+        isAuthenticated: isLoggedin
       });
     })
     .catch((err) => console.log(err));
 };
 
 exports.getCheckout = (req, res, next) => {
-  res.render("shop/checkout", { pageTitle: "Checkout", path: "/checkout" });
+  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
+  res.render("shop/checkout", { pageTitle: "Checkout", path: "/checkout",isAuthenticated: isLoggedin });
 };
 
 exports.getOrders = (req, res, next) => {
+  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
   Order.find({"user.userId": req.user._id})
   .then((orders) => {
     res.render("shop/orders", {
       orders: orders,
       pageTitle: "Your Orders",
       path: "/orders",
+      isAuthenticated: isLoggedin
     });
   });
 };
 
 exports.getProduct = (req, res, next) => {
+  const isLoggedin = req.get("Cookie").split("=")[1] === "true";
   const proId = req.params.productId;
   //   Product.findAll({where: {id: proId}})
   //   .then(product =>
@@ -75,6 +85,7 @@ exports.getProduct = (req, res, next) => {
         product: product,
         pageTitle: "Product Detail",
         path: "/products",
+        isAuthenticated: isLoggedin
       })
     )
     .catch((err) => console.log(err));
