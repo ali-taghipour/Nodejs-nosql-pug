@@ -2,6 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const MongodbStore = require("connect-mongodb-session")(session);
+const csrf = require("csurf");
+const flash = require("connect-flash");
 
 const adminRoutes = require("./routes/admin");
 const shopRouter = require("./routes/shop");
@@ -21,6 +23,8 @@ const store = new MongodbStore({
   collection: "sessions"
 })
 
+const csrfProtection = csrf();
+
 app.set("view engine", "pug");
 app.set("views", "views");
 
@@ -31,7 +35,9 @@ app.use(express.static(path.join(dirPath, "public")));
 // we can use any name for secret and it use for hashing data
 // we use resave to not save per session per request expect on it did change
 // we use saveUnitialized for not saving unitialized value
-app.use(session({secret: "my secret", resave: false, saveUninitialized: false, store: store}))
+app.use(session({secret: "my secret", resave: false, saveUninitialized: false, store: store}));
+app.use(csrfProtection);
+app.use(flash());
 
 app.use((req, res, next) => {
   if(!req.session.user){
@@ -44,6 +50,13 @@ app.use((req, res, next) => {
   }
 });
 
+app.use((req,res,next) => {
+  // locals use for views in other hands we access thease properties such as isAthenticated and csrf token in any view page
+  res.locals.isAuthenticated = req.session.isLoggedin;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+})
+
 app.use("/admin", adminRoutes);
 app.use(shopRouter);
 app.use(authRouter);
@@ -52,19 +65,6 @@ app.use(errorController.get404);
 
 mongoose.connect(MogodbConnectionURI,{ useNewUrlParser: true,useUnifiedTopology: true })
 .then(() => {
-  User.findOne().then(user => {
-    if(!user){
-      const user = new User({
-        userName: "Ali",
-        email: "taghipourali19@gmail.com",
-        cart: {items:[]}
-      });
-      user.save();
-    }
-  }).catch(err => {
-    console.log(err)
-  })
-
   app.listen(5000);
 }).catch(err => {
   console.log(err)

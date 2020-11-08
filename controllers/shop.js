@@ -2,14 +2,12 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
-  const isLoggedin = req.session.isLoggedin;
   Product.find()
     .then((products) =>
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
-        path: "/products",
-        isAuthenticated: isLoggedin
+        path: "/products"
       })
     )
     .catch((err) => console.log(err));
@@ -19,21 +17,18 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  const isLoggedin = req.session.isLoggedin;
   Product.find()
     .then((products) =>
       res.render("shop/index", {
         prods: products,
         pageTitle: "My Shop",
-        path: "/",
-        isAuthenticated: isLoggedin
+        path: "/"
       })
     )
     .catch((err) => console.log(err));
 };
 
 exports.getCart = (req, res, next) => {
-  const isLoggedin = req.session.isLoggedin;
   req.user
   // populate spread other props of productId into cart items
     .populate("cart.items.productId")
@@ -44,33 +39,28 @@ exports.getCart = (req, res, next) => {
       res.render("shop/cart", {
         cartProducts: products,
         pageTitle: "cart",
-        path: "/cart",
-        isAuthenticated: isLoggedin
+        path: "/cart"
       });
     })
     .catch((err) => console.log(err));
 };
 
 exports.getCheckout = (req, res, next) => {
-  const isLoggedin = req.session.isLoggedin;
-  res.render("shop/checkout", { pageTitle: "Checkout", path: "/checkout",isAuthenticated: isLoggedin });
+  res.render("shop/checkout", { pageTitle: "Checkout", path: "/checkout"});
 };
 
 exports.getOrders = (req, res, next) => {
-  const isLoggedin = req.session.isLoggedin;
   Order.find({"user.userId": req.user._id})
   .then((orders) => {
     res.render("shop/orders", {
       orders: orders,
       pageTitle: "Your Orders",
-      path: "/orders",
-      isAuthenticated: isLoggedin
+      path: "/orders"
     });
   });
 };
 
 exports.getProduct = (req, res, next) => {
-  const isLoggedin = req.session.isLoggedin;
   const proId = req.params.productId;
   //   Product.findAll({where: {id: proId}})
   //   .then(product =>
@@ -84,8 +74,7 @@ exports.getProduct = (req, res, next) => {
       res.render("shop/product-detail", {
         product: product,
         pageTitle: "Product Detail",
-        path: "/products",
-        isAuthenticated: isLoggedin
+        path: "/products"
       })
     )
     .catch((err) => console.log(err));
@@ -122,7 +111,7 @@ exports.postOrder = (req, res, next) => {
       })
       const order = new Order({
         user:{
-          userName: req.user.userName,
+          email: req.user.email,
           userId: req.user
         },
         products: products

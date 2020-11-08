@@ -1,11 +1,9 @@
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
-  const isLoggedin = req.session.isLoggedin;
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
-    isAuthenticated: isLoggedin
   });
 };
 
@@ -32,7 +30,6 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  const isLoggedin = req.session.isLoggedin;
   Product.find()
   // -_id in select means removing product id
   // by select we just get some props
@@ -44,7 +41,6 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
-        isAuthenticated: isLoggedin
       });
     })
     .catch((err) => console.log(err));
@@ -52,7 +48,6 @@ exports.getProducts = (req, res, next) => {
 
 exports.getEditProduct = (req, res, next) => {
   const editMode = req.query.edit;
-  const isLoggedin = req.session.isLoggedin;
   if (!editMode) {
     return res.redirect("/");
   }
@@ -64,8 +59,7 @@ exports.getEditProduct = (req, res, next) => {
         product: product,
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
-        editing: true,
-        isAuthenticated: isLoggedin
+        editing: true
       });
     })
     .catch((err) => console.log(err));
