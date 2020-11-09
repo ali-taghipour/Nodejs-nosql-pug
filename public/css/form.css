@@ -21,3 +21,13 @@
 .form-control textarea:focus {
     outline-color: #00695c;
 }
+
+.resetPass{
+ display: block;
+ width: 150px;
+ margin: 40px auto;
+ padding: 10px;
+ text-align: center;
+ text-decoration: none;
+ color: orangered; 
+}
