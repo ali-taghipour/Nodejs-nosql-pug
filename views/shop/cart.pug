@@ -12,6 +12,7 @@ block content
                         h1 #{p.productId.title}
                         h2 Quantity: #{p.quantity} 
                         form(action="/cart-delete-item" method="POST")
+                            input(type="hidden" name="_csrf" value=csrfToken)
                             input(type="hidden" name="productId" value=`${p.productId._id}`)
                             button.btn_danger(type="submit") Delete
             form(action="/orders" method="post")

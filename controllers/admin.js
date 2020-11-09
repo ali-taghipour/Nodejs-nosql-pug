@@ -30,7 +30,7 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  Product.find({userId: req.user._id})
   // -_id in select means removing product id
   // by select we just get some props
   //.select("title price -_id")
@@ -72,6 +72,9 @@ exports.postEditProduct = (req, res, next) => {
   const productPrice = req.body.price;
   const productDescription = req.body.description;
   Product.findById(productId).then(product => {
+    if(product.userId.toString() !== req.user._id.toString()){
+      return res.redirect("/");
+    }
     product.title = productTitle;
     product.price = productPrice;
     product.description = productDescription;
@@ -87,7 +90,9 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const productId = req.body.productId;
-  Product.findByIdAndRemove(productId)
+  //Product.findByIdAndRemove(productId)
+  // we use deleteOne to pass more props to which product we wanna delete by authorized one
+  Product.deleteOne({_id: productId , userId: req.user._id})
     .then(() => {
       console.log("Destroied Product!");
       res.redirect("/admin/products");
