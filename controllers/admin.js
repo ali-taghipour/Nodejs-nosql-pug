@@ -1,9 +1,13 @@
 const Product = require("../models/product");
+const {validationResult} = require("express-validator");
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
+      errorMessage: null,
+      errorValues: [],
+      hasError: false
   });
 };
 
@@ -12,6 +16,23 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
+
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    return res.render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      errorMessage: errors.array(),
+      errorValues: errors.array(),
+      product: {
+        title: title,
+        price: price,
+        description: description,
+        imageUrl: imageUrl
+      },
+      hasError: true
+    });
+  }
   
   const product = new Product({
     title: title,
@@ -20,6 +41,7 @@ exports.postAddProduct = (req, res, next) => {
     imageUrl: imageUrl,
     // i didn't add req.user._id because it gets it automatically
     userId: req.user
+
   });
   product.save().then(() => {
     console.log("Product Created!!!");
@@ -59,7 +81,9 @@ exports.getEditProduct = (req, res, next) => {
         product: product,
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
-        editing: true
+        editing: true,
+        errorMessage: null,
+        errorValues: []
       });
     })
     .catch((err) => console.log(err));
@@ -71,6 +95,25 @@ exports.postEditProduct = (req, res, next) => {
   const productImageUrl = req.body.imageUrl;
   const productPrice = req.body.price;
   const productDescription = req.body.description;
+
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    return res.render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      errorMessage: errors.array(),
+      errorValues: errors.array(),
+      product: {
+        title: title,
+        price: price,
+        description: description,
+        imageUrl: imageUrl,
+        _id: productId
+      },
+      hasError: true
+    });
+  }
+
   Product.findById(productId).then(product => {
     if(product.userId.toString() !== req.user._id.toString()){
       return res.redirect("/");
@@ -83,7 +126,7 @@ exports.postEditProduct = (req, res, next) => {
   })
     .then(() => {
       console.log("Product Updated!!!");
-      res.redirect("/");
+      res.redirect("/admin/products");
     })
     .catch((err) => console.log(err));
 };

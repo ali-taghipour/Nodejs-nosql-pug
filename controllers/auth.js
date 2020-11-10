@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer");
 //const sendgridTransport = require("nodemailer-sendgrid-transport"); we use for amazon service
 const crypto = require("crypto");
 const User = require("../models/user");
-const flash = require("connect-flash/lib/flash");
+const { validationResult } = require("express-validator");
 
 const transporter = nodemailer.createTransport({
   host: "smtp-mail.outlook.com",
@@ -19,30 +19,29 @@ const transporter = nodemailer.createTransport({
 });
 
 exports.getLogin = (req, res, next) => {
-  let message = req.flash("error");
-  if (message.length > 0) {
-    message = message[0];
-  } else {
-    message = null;
-  }
   res.render("auth/login", {
     pageTitle: "Login",
     path: "/login",
-    errorMessage: message,
+    errorMessage: "",
+    oldValue: {
+      email: "",
+      password: ""
+    },
+    errorValues: []
   });
 };
 
 exports.getSignup = (req, res, next) => {
-  let message = req.flash("error");
-  if (message.length > 0) {
-    message = message[0];
-  } else {
-    message = null;
-  }
   res.render("auth/signup", {
     pageTitle: "Signup",
     path: "/signup",
-    errorMessage: message,
+    errorMessage: null,
+    oldValue: {
+      email: "",
+      password: "",
+      repassword: "",
+    },
+    errorValues: []
   });
 };
 
@@ -90,11 +89,33 @@ exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    return res.status(422).render("auth/login", {
+      pageTitle: "Login",
+      path: "/login",
+      errorMessage: errors.array(),
+      oldValues: {
+        email: email,
+        password: password
+      },
+      errorValues: errors.array()
+    });
+  }
+
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
-        req.flash("error", "Invalid email or password");
-        return res.redirect("/login");
+        return res.status(422).render("auth/login", {
+          pageTitle: "Login",
+          path: "/login",
+          errorMessage: [{msg:"Invalid email or password"}],
+          oldValue: {
+            email: email,
+            password: password
+          },
+          errorValues: []
+        });
       }
       bcrypt.compare(password, user.password).then((isValidPassword) => {
         if (isValidPassword) {
@@ -105,8 +126,16 @@ exports.postLogin = (req, res, next) => {
             res.redirect("/");
           });
         } else {
-          req.flash("error", "Invalid email or password");
-          return res.redirect("/login");
+          return res.status(422).render("auth/login", {
+            pageTitle: "Login",
+            path: "/login",
+            errorMessage: [{msg:"Invalid email or password"}],
+            oldValue: {
+              email: email,
+              password: password
+            },
+            errorValues: []
+          });
         }
       });
     })
@@ -116,40 +145,42 @@ exports.postLogin = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  const repassword = req.body.repassword;
 
-  User.findOne({ email: email })
-    .then((user) => {
-      if (user) {
-        req.flash("error", "The user already exists!!!");
-        return res.redirect("/signup");
-      } else {
-        bcrypt.hash(password, 12).then((hashPassword) => {
-          const user = new User({
-            email: email,
-            password: hashPassword,
-            cart: { items: [] },
-          });
-          return user
-            .save()
-            .then((result) => {
-              res.redirect("/login");
-              return transporter.sendMail({
-                to: email,
-                from: "taghipourali19@hotmail.com",
-                subject: "Sign up succeeded!!!",
-                html: "<h1>You have successfully signed up.</h1>",
-              });
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        });
-      }
-    })
-    .catch((err) => {
-      console.log(err);
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/signup", {
+      pageTitle: "Signup",
+      path: "/signup",
+      errorMessage: errors.array(),
+      oldValue: {
+        email: email,
+        password: password,
+        repassword: req.body.repassword,
+      },
+      errorValues: errors.array()
     });
+  }
+  bcrypt.hash(password, 12).then((hashPassword) => {
+    const user = new User({
+      email: email,
+      password: hashPassword,
+      cart: { items: [] },
+    });
+    return user
+      .save()
+      .then((result) => {
+        res.redirect("/login");
+        return transporter.sendMail({
+          to: email,
+          from: "taghipourali19@hotmail.com",
+          subject: "Sign up succeeded!!!",
+          html: "<h1>You have successfully signed up.</h1>",
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
 };
 
 exports.postLogout = (req, res, next) => {

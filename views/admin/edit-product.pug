@@ -6,16 +6,19 @@ block styles
 
 block content
     main
+        if errorMessage
+            each err in errorMessage
+                div(class="user-message user-message--error") #{err.msg}
         form.product-form(action=`${editing ? "/admin/edit-product" : "/admin/add-product"}`, method="POST")
             .form-control
                 label(for="title") Title
-                input(type="text", name="title" value=`${editing ? product.title : ""}`)#title
+                input(type="text", name="title" class=`${errorValues.find(er => er.param === "title" ) ? "inputError" : "inputText"}` value=`${editing || hasError ? product.title : ""}`)#title
                 label(for="imageUrl") Image Url
-                input(type="text", name="imageUrl" value=`${editing ? product.imageUrl : ""}`)#imageUrl
+                input(type="text", name="imageUrl" class=`${errorValues.find(er => er.param === "imageUrl" ) ? "inputError" : "inputText"}` value=`${editing || hasError ? product.imageUrl : ""}`)#imageUrl
                 label(for="price") Price
-                input(type="text", name="price" value=`${editing ? product.price : ""}`)#price
+                input(type="text", name="price" class=`${errorValues.find(er => er.param === "price" ) ? "inputError" : "inputText"}` value=`${editing || hasError ? product.price : ""}`)#price
                 label(for="description") Description
-                textarea(type="text", name="description" rows="5" cols="35")#description #{editing ? product.description : ""}
+                textarea(type="text", name="description" class=`${errorValues.find(er => er.param === "description" ) ? "inputError" : "inputText"}` rows="5" cols="35")#description #{editing || hasError ? product.description : ""}
                 if editing
                     input(type="hidden" name="productId" value=`${product._id}`)
                 input(type="hidden" name="_csrf" value=csrfToken)

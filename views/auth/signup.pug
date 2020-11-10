@@ -7,16 +7,17 @@ block styles
 block content
     main
         if errorMessage
-                div(class="user-message user-message--error") #{errorMessage}
+            each err in errorMessage
+                div(class="user-message user-message--error") #{err.msg}
         form.login-form(action="/signup" method="POST")
             div.form-control
                 label(for="email") E-Mail
-                input(type="email" name="email" id="email")
+                input(type="email" name="email" id="email" value=oldValue.email class=`${errorValues.find(er => er.param === "email" ) ? "inputError" : "inputText"}`)
             div.form-control
                 label(for="password") Password
-                input(type="password" name="password" id="password")
+                input(type="password" name="password" id="password" value=oldValue.password class=`${errorValues.find(er => er.param === "password" ) ? "inputError" : "inputText"}`)
             div.form-control
-                label(for="password") Confirm Password
-                input(type="password" name="repassword" id="repassword")
+                label(for="repassword") Confirm Password
+                input(type="password" name="repassword" id="repassword" value=oldValue.repassword class=`${errorValues.find(er => er.param === "repassword" ) ? "inputError" : "inputText"}`)
             input(type="hidden" name="_csrf" value=csrfToken)
             button.btn(type="submit") Signup

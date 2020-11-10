@@ -12,7 +12,7 @@ router.get('/cart',isAuth, shopController.getCart);
 
 router.post('/cart',isAuth,shopController.postCart);
 
-router.get('/products/:productId',isAuth, shopController.getProduct);
+router.get('/products/:productId', shopController.getProduct);
 
 router.get('/orders',isAuth,shopController.getOrders);
 

@@ -7,14 +7,15 @@ block styles
 block content
     main
         if errorMessage
-            div(class="user-message user-message--error") #{errorMessage}
-        form.login-form(action="/login" method="POST")
+            each err in errorMessage
+                div(class="user-message user-message--error") #{err.msg}
+        form.login-form(action="/login" method="POST" novalidate)
             div.form-control
                 label(for="email") E-Mail
-                input(type="email" name="email" id="email")
+                input(type="email" name="email" id="email" value=oldValue.email class=`${errorValues.find(er => er.param === "email" ) ? "inputError" : "inputText"}`)
             div.form-control
                 label(for="password") Password
-                input(type="password" name="password" id="password")
+                input(type="password" name="password" id="password" value=oldValue.password class=`${errorValues.find(er => er.param === "password" ) ? "inputError" : "inputText"}`)
             input(type="hidden" name="_csrf" value=csrfToken)
             button.btn(type="submit") Login
         a.resetPass(href="/resetPassword") Reset Password
