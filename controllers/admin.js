@@ -19,7 +19,7 @@ exports.postAddProduct = (req, res, next) => {
 
   const errors = validationResult(req);
   if(!errors.isEmpty()){
-    return res.render("admin/edit-product", {
+    return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
       path: "/admin/add-product",
       errorMessage: errors.array(),
@@ -98,7 +98,7 @@ exports.postEditProduct = (req, res, next) => {
 
   const errors = validationResult(req);
   if(!errors.isEmpty()){
-    return res.render("admin/edit-product", {
+    return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
       path: "/admin/add-product",
       errorMessage: errors.array(),
