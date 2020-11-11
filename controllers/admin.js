@@ -47,7 +47,26 @@ exports.postAddProduct = (req, res, next) => {
     console.log("Product Created!!!");
     res.redirect("/admin/products");
   }).catch(err => {
-    console.log(err);
+    /***** some scenario we have minor problem and we redirect to 500 page as blew ****/
+    //res.status(500).redirect("/500")
+    /***** we can solve upon problem by using express error middleware handler ****/
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
+    /////////************** it is for such case we can fix as fast ***********//////
+    // return res.status(500).render("admin/edit-product", {
+    //   pageTitle: "Add Product",
+    //   path: "/admin/add-product",
+    //   errorMessage: [{msg:"Database operation has failed. Please try later."}],
+    //   errorValues: [],
+    //   product: {
+    //     title: title,
+    //     price: price,
+    //     description: description,
+    //     imageUrl: imageUrl
+    //   },
+    //   hasError: true
+    // });
   });
 };
 
@@ -65,7 +84,11 @@ exports.getProducts = (req, res, next) => {
         path: "/admin/products",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -86,7 +109,11 @@ exports.getEditProduct = (req, res, next) => {
         errorValues: []
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -128,7 +155,11 @@ exports.postEditProduct = (req, res, next) => {
       console.log("Product Updated!!!");
       res.redirect("/admin/products");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -140,5 +171,9 @@ exports.postDeleteProduct = (req, res, next) => {
       console.log("Destroied Product!");
       res.redirect("/admin/products");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };

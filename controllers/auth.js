@@ -81,7 +81,9 @@ exports.getNewPassword = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
     });
 };
 
@@ -139,7 +141,11 @@ exports.postLogin = (req, res, next) => {
         }
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
 exports.postSignup = (req, res, next) => {
@@ -178,7 +184,9 @@ exports.postSignup = (req, res, next) => {
         });
       })
       .catch((err) => {
-        console.log(err);
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        next(error);
       });
   });
 };
@@ -218,7 +226,9 @@ exports.postResetPassword = (req, res, next) => {
         });
       })
       .catch((err) => {
-        console.log(err);
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        next(error);
       });
   });
 };
@@ -227,6 +237,7 @@ exports.postNewPassword = (req, res, next) => {
   const userId = req.body.userId;
   const newPassword = req.body.password;
   const resetToken = req.body.resetToken;
+  let resetUser;
 
   User.findOne({
     _id: userId,
@@ -234,21 +245,21 @@ exports.postNewPassword = (req, res, next) => {
     tokenExpiration: { $gt: Date.now() },
   })
     .then((user) => {
-      if (!user) {
-        return res.redirect("/");
-      }
-      bcrypt
-        .hash(newPassword, 12)
-        .then((hashPassword) => {
-          user.password = hashPassword;
-          user.resetToken = undefined;
-          user.tokenExpiration = undefined;
-          return user.save();
-        })
-        .then((result) => {
-          res.redirect("/login");
-        })
-        .catch((err) => console.log(err));
+      resetUser = user;
+      return bcrypt.hash(newPassword, 12)
     })
-    .catch((err) => console.log(err));
+      .then((hashPassword) => {
+        resetUser.password = hashPassword;
+        resetUser.resetToken = undefined;
+        resetUser.tokenExpiration = undefined;
+        return resetUser.save();
+      })
+      .then((result) => {
+        res.redirect("/login");
+      })
+      .catch((err) => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        next(error);
+      });
 };
