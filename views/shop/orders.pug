@@ -10,6 +10,7 @@ block content
                 each order in orders
                     li.orders__item
                         h1 # #{order._id}
+                        a(href="/orders/" + order._id) -- invoice
                         ul.orders__products
                             each p in order.products
                                 li.orders__products-item #{p.product.title} (#{p.quantity})

@@ -7,7 +7,7 @@ block content
         h1 #{product.title}
         hr
         div.imageContainer
-            img(src=`${product.imageUrl}` alt=`${product.title}`)
+            img(src=`/${product.imageUrl}` alt=`${product.title}`)
         h2 #{product.price}
         p #{product.description}
         if isAuthenticated

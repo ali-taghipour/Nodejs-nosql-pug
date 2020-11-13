@@ -1,5 +1,6 @@
 const Product = require("../models/product");
 const {validationResult} = require("express-validator");
+const fileControler = require("../util/file");
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -13,10 +14,27 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
 
+  if(!image){
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      errorMessage: [{msg:"The file format is incrrect and required!!!"}],
+      errorValues: [],
+      product: {
+        title: title,
+        price: price,
+        description: description,
+      },
+      hasError: true
+    }); 
+  }
+
+  const imagePath = image.path;
+  
   const errors = validationResult(req);
   if(!errors.isEmpty()){
     return res.status(422).render("admin/edit-product", {
@@ -27,8 +45,7 @@ exports.postAddProduct = (req, res, next) => {
       product: {
         title: title,
         price: price,
-        description: description,
-        imageUrl: imageUrl
+        description: description
       },
       hasError: true
     });
@@ -38,7 +55,7 @@ exports.postAddProduct = (req, res, next) => {
     title: title,
     price: price,
     description: description,
-    imageUrl: imageUrl,
+    imageUrl: imagePath,
     // i didn't add req.user._id because it gets it automatically
     userId: req.user
 
@@ -119,7 +136,7 @@ exports.getEditProduct = (req, res, next) => {
 exports.postEditProduct = (req, res, next) => {
   const productId = req.body.productId;
   const productTitle = req.body.title;
-  const productImageUrl = req.body.imageUrl;
+  const productImage = req.file;
   const productPrice = req.body.price;
   const productDescription = req.body.description;
 
@@ -134,7 +151,6 @@ exports.postEditProduct = (req, res, next) => {
         title: title,
         price: price,
         description: description,
-        imageUrl: imageUrl,
         _id: productId
       },
       hasError: true
@@ -148,7 +164,11 @@ exports.postEditProduct = (req, res, next) => {
     product.title = productTitle;
     product.price = productPrice;
     product.description = productDescription;
-    product.imageUrl = productImageUrl;
+    if(productImage){
+      fileControler.deleteFile(product.imageUrl);
+      product.imageUrl = productImage.path;
+      console.log("ssadsad")
+    }
     product.save();
   })
     .then(() => {
@@ -164,9 +184,16 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const productId = req.body.productId;
-  //Product.findByIdAndRemove(productId)
-  // we use deleteOne to pass more props to which product we wanna delete by authorized one
-  Product.deleteOne({_id: productId , userId: req.user._id})
+
+  Product.findById(productId).then(product => {
+    if(!product){
+      return next(new Error("Not found Product!!!"))
+    }
+    fileControler.deleteFile(product.imageUrl);
+     //Product.findByIdAndRemove(productId)
+    // we use deleteOne to pass more props to which product we wanna delete by authorized one
+    return Product.deleteOne({_id: productId , userId: req.user._id});
+  })
     .then(() => {
       console.log("Destroied Product!");
       res.redirect("/admin/products");

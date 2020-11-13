@@ -15,8 +15,6 @@ router.post('/add-product',[
     .isString()
     .isLength({min:3})
     .trim(),
-    body("imageUrl","Please enter the image url in right format.")
-    .isURL(),
     body("price","Please enter the price in right format")
     .isFloat(),
     body("description","Please enter the description in right format at least 5 charecter and max 400 charecter")
@@ -33,8 +31,6 @@ router.post('/edit-product',[
     .isString()
     .isLength({min:3})
     .trim(),
-    body("imageUrl")
-    .isURL(),
     body("price")
     .isFloat(),
     body("description")

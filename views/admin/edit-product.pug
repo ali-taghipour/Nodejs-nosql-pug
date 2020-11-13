@@ -9,12 +9,14 @@ block content
         if errorMessage
             each err in errorMessage
                 div(class="user-message user-message--error") #{err.msg}
-        form.product-form(action=`${editing ? "/admin/edit-product" : "/admin/add-product"}`, method="POST")
+        form.product-form(action=`${editing ? "/admin/edit-product" : "/admin/add-product"}`, method="POST" encType="multipart/form-data")
             .form-control
                 label(for="title") Title
                 input(type="text", name="title" class=`${errorValues.find(er => er.param === "title" ) ? "inputError" : "inputText"}` value=`${editing || hasError ? product.title : ""}`)#title
-                label(for="imageUrl") Image Url
-                input(type="text", name="imageUrl" class=`${errorValues.find(er => er.param === "imageUrl" ) ? "inputError" : "inputText"}` value=`${editing || hasError ? product.imageUrl : ""}`)#imageUrl
+                //- label(for="imageUrl") Image Url
+                //- input(type="text", name="imageUrl" class=`${errorValues.find(er => er.param === "imageUrl" ) ? "inputError" : "inputText"}` value=`${editing || hasError ? product.imageUrl : ""}`)#imageUrl
+                label(for="image") Image
+                input(type="file", name="image" id="image")
                 label(for="price") Price
                 input(type="text", name="price" class=`${errorValues.find(er => er.param === "price" ) ? "inputError" : "inputText"}` value=`${editing || hasError ? product.price : ""}`)#price
                 label(for="description") Description

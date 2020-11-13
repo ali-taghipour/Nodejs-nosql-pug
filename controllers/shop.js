@@ -1,5 +1,10 @@
+const fs = require("fs");
+const path = require("path");
+const PdfDocument = require("pdfkit");
+
 const Product = require("../models/product");
 const Order = require("../models/order");
+const { send } = require("process");
 
 exports.getProducts = (req, res, next) => {
   Product.find()
@@ -158,3 +163,64 @@ exports.postOrder = (req, res, next) => {
       next(error);
     });
 };
+
+exports.getOrderDetail = (req,res,next) => {
+  const orderId = req.params.orderId;
+  const invoiceName = "invoice-" + orderId + ".pdf";
+  const invoicePath = path.join("data","invoices",invoiceName);
+
+  Order.findById(orderId).then(order => {
+    if(!order){
+      return next(new Error("Not found such this order"));
+    }
+    if(order.user.userId.toString() !== req.user._id.toString()){
+      return next(new Error("UnAthorized "));
+    } 
+
+    const pdfDoc = new PdfDocument();
+    res.setHeader("Content-Type","application/pdf");
+    res.setHeader("Content-Disposition","inline; filename = '" + invoiceName + "'");
+    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+    pdfDoc.pipe(res);
+
+    pdfDoc.fontSize(26).text("Invoice",{
+      underline: true
+    });
+
+    pdfDoc.text("----------");
+
+    let totalPrice = 0;
+
+    order.products.forEach(prod => {
+      totalPrice += prod.quantity * prod.product.price
+      pdfDoc.fontSize(14).text(prod.product.title + " - " + prod.quantity + " * $" + prod.product.price);
+      pdfDoc
+    });
+
+    pdfDoc.text("----------");
+
+    pdfDoc.text("Total Price: $" + totalPrice)
+
+    pdfDoc.end();
+
+    // fs.readFile(invoicePath,(err,data) => {
+    //   if(err){
+    //     return next(err);
+    //   }
+    //   res.setHeader("Content-Type","application/pdf");
+    //   // we can add attachment instead of inline to downloading directle
+    //   res.setHeader("Content-Disposition","inline; filename = '" + invoiceName + "'");
+    //   res.send(data);
+    // });
+
+    /** for small data the top code is ok but for big file we should stream it as below */
+    // const file = fs.createReadStream(invoicePath);
+    // res.setHeader("Content-Type","application/pdf");
+    // res.setHeader("Content-Disposition","inline; filename = '" + invoiceName + "'");
+    // file.pipe(res);
+
+  }).catch(err => {
+    next(err);
+  })
+  
+}
