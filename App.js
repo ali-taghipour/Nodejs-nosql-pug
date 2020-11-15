@@ -52,6 +52,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(multer({storage: fileStorage, fileFilter:fileFilter}).single("image"));
 
 app.use(express.static(path.join(dirPath, "public")));
+app.use(express.static(path.join(dirPath, "js")));
 app.use("/images",express.static(path.join(dirPath, "images")));
 
 // we can use any name for secret and it uses for hashing data

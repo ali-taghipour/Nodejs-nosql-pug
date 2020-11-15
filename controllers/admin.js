@@ -182,8 +182,8 @@ exports.postEditProduct = (req, res, next) => {
     });
 };
 
-exports.postDeleteProduct = (req, res, next) => {
-  const productId = req.body.productId;
+exports.deleteProduct = (req, res, next) => {
+  const productId = req.params.productId;
 
   Product.findById(productId).then(product => {
     if(!product){
@@ -195,12 +195,9 @@ exports.postDeleteProduct = (req, res, next) => {
     return Product.deleteOne({_id: productId , userId: req.user._id});
   })
     .then(() => {
-      console.log("Destroied Product!");
-      res.redirect("/admin/products");
+      res.status(200).json({message: "Succeed!"});
     })
     .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      next(error);
+      res.status(500).json({message: "Delete product failed!"});
     });
 };
