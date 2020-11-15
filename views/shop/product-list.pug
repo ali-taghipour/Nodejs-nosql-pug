@@ -23,6 +23,18 @@ block content
                                     input(type="hidden" name="_csrf" value=csrfToken)
                                     input(type="hidden" name="productId" value=`${product._id}`)
                                     button.btn(type="submit") Add to Cart
+
+            section.pagination
+                    if currentPage !== 1 
+                        a(href="?page=1") 1
+                    if hasPreviousPage && previousPage !== 1
+                        a(href="?page=" + previousPage) #{previousPage}
+                    a.active(href="?page=" + currentPage) #{currentPage}
+                    if hasNextPage
+                        a(href="?page=" + nextPage) #{nextPage}
+                    if lastPage !== currentPage && lastPage !== nextPage
+                        a(href="?page=" + lastPage) #{lastPage}
+
         else
             h1 No Products
 

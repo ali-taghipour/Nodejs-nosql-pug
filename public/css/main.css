@@ -241,6 +241,26 @@ form {
   color: red;
 }
 
+.pagination{
+  margin: 50px auto;
+  text-align: center;
+}
+
+.pagination a{
+  border: 1px solid #00695c;
+  padding: 3px 5px;
+  margin-left: 10px;
+  text-decoration: none;
+  color: #00695c;
+}
+
+.pagination a:hover,
+.pagination a:active,
+.pagination a.active{
+  background-color: #00695c;
+  color: #ffffff;
+}
+
 
 @media (min-width: 768px) {
   .main-header__nav {

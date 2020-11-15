@@ -4,15 +4,34 @@ const PdfDocument = require("pdfkit");
 
 const Product = require("../models/product");
 const Order = require("../models/order");
-const { send } = require("process");
+
+
+const ITEM_PER_PAGE = 1;
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  const page = +req.query.page || 1;
+  let totalProducts;
+
+  Product.countDocuments().then(numProducts => {
+    totalProducts = numProducts;
+    return Product.find()
+    // skip is the cursor the point of product to fetching
+    .skip((page -1) * ITEM_PER_PAGE)
+    // limit return the maximum number of product that starts from skip point or cursor
+    .limit(ITEM_PER_PAGE)
+  })
     .then((products) =>
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
-        path: "/products"
+        path: "/products",
+        totalProducts: totalProducts,
+        hasNextPage: page * ITEM_PER_PAGE < totalProducts,
+        nextPage: page + 1,
+        hasPreviousPage: page > 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalProducts/ITEM_PER_PAGE),
+        currentPage: page
       })
     )
     .catch((err) => {
@@ -26,19 +45,37 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.find()
-    .then((products) =>
-      res.render("shop/index", {
-        prods: products,
-        pageTitle: "My Shop",
-        path: "/"
-      })
-    )
+  const page = +req.query.page || 1;
+  let totalProducts;
+
+  Product.countDocuments().then(numProducts => {
+    totalProducts = numProducts;
+    return Product.find()
+    // skip is the cursor the point of product to fetching
+    .skip((page -1) * ITEM_PER_PAGE)
+    // limit return the maximum number of product that starts from skip point or cursor
+    .limit(ITEM_PER_PAGE)
+  })
+  .then((products) => {
+
+    res.render("shop/index", {
+      prods: products,
+      pageTitle: "My Shop",
+      path: "/",
+      totalProducts: totalProducts,
+      hasNextPage: page * ITEM_PER_PAGE < totalProducts,
+      nextPage: page + 1,
+      hasPreviousPage: page > 1,
+      previousPage: page - 1,
+      lastPage: Math.ceil(totalProducts/ITEM_PER_PAGE),
+      currentPage: page
+    })
+  })
     .catch((err) => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       next(error);
-    });
+    });   
 };
 
 exports.getCart = (req, res, next) => {
