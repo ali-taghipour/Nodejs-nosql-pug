@@ -5,17 +5,23 @@ const MongodbStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
+const helmet = require("helmet");
+const compression = require("compression");
+const morgan = require("morgan");
 
 const adminRoutes = require("./routes/admin");
 const shopRouter = require("./routes/shop");
 const authRouter = require("./routes/auth");
 const dirPath = require("./util/path");
 const path = require("path");
+const fs = require("fs");
 const errorController = require("./controllers/error");
 const mongoose = require("mongoose");
 const User = require("./models/user");
 
 const MogodbConnectionURI = "mongodb://localhost:27017/shop";
+
+const accessLogRequestStream = fs.createWriteStream(path.join(__dirname,"logRequest.log"),{flags:"a"});
 
 const app = express();
 
@@ -47,6 +53,10 @@ const csrfProtection = csrf();
 
 app.set("view engine", "pug");
 app.set("views", "views");
+
+app.use(helmet()); // security middlewares
+app.use(compression()); // zip js or some file to surve
+app.use(morgan("combined",{stream:accessLogRequestStream}));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(multer({storage: fileStorage, fileFilter:fileFilter}).single("image"));

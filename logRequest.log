@@ -1,0 +1,8 @@
+::1 - - [09/Dec/2020:12:15:29 +0000] "GET /products HTTP/1.1" 200 - "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"
+::1 - - [09/Dec/2020:12:15:29 +0000] "GET /css/main.css HTTP/1.1" 304 - "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"
+::1 - - [09/Dec/2020:12:15:29 +0000] "GET /css/product.css HTTP/1.1" 304 - "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"
+::1 - - [09/Dec/2020:12:15:29 +0000] "GET /images/2020-11-14T22:04:14.412Z-Screenshot%20from%202020-08-16%2018-21-31.png HTTP/1.1" 304 - "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"
+::1 - - [09/Dec/2020:12:15:47 +0000] "GET /products HTTP/1.1" 200 - "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"
+::1 - - [09/Dec/2020:12:15:47 +0000] "GET /css/main.css HTTP/1.1" 304 - "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"
+::1 - - [09/Dec/2020:12:15:47 +0000] "GET /css/product.css HTTP/1.1" 304 - "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"
+::1 - - [09/Dec/2020:12:15:47 +0000] "GET /images/2020-11-14T22:04:14.412Z-Screenshot%20from%202020-08-16%2018-21-31.png HTTP/1.1" 304 - "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"
