@@ -9,6 +9,15 @@ const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
 
+const https = require ("https");
+
+
+/** ssl commands:
+ * 
+ * openssl req -nodes -new -x509 -keyout sever.key -out server.cert
+ */
+
+
 const adminRoutes = require("./routes/admin");
 const shopRouter = require("./routes/shop");
 const authRouter = require("./routes/auth");
@@ -50,6 +59,9 @@ const fileFilter = (req,file,cb) => {
 }
 
 const csrfProtection = csrf();
+
+const privateKey = fs.readFileSync("sever.key");
+const certificate = fs.readFileSync("server.cert");
 
 app.set("view engine", "pug");
 app.set("views", "views");
@@ -116,7 +128,8 @@ app.use((error,req,res,next) => {
 
 mongoose.connect(MogodbConnectionURI,{ useNewUrlParser: true,useUnifiedTopology: true })
 .then(() => {
-  app.listen(5000);
+   app.listen(5000);
+  //https.createServer({key:privateKey,cert:certificate},app).listen(5000);
 }).catch(err => {
   console.log(err)
 })
